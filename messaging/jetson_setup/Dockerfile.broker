@@ -1,0 +1,6 @@
+FROM alpine
+
+# install OS packages
+RUN apk update
+RUN apk upgrade
+RUN apk add mosquitto

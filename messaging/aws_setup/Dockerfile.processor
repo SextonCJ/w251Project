@@ -1,0 +1,32 @@
+FROM python:3.7-slim-buster
+
+# Create working directory - this is where the python file will be kept
+RUN mkdir -p /usr/src/app/engagement/s3
+WORKDIR /usr/src/app/engagement
+
+# Copy python file for image processing
+COPY processor.py /usr/src/app/engagement/
+
+# install OS packages
+RUN apt-get update
+
+# Install python packages
+RUN pip install paho-mqtt
+
+# pre-reqs for FUSE
+RUN apt-get update -y
+RUN apt-get install -y automake autotools-dev fuse g++ git libcurl4-gnutls-dev libfuse-dev libssl-dev libxml2-dev make pkg-config
+
+# Install S3 Fuse
+RUN rm -rf /usr/src/s3fs-fuse
+RUN git clone https://github.com/s3fs-fuse/s3fs-fuse/ /usr/src/s3fs-fuse
+WORKDIR /usr/src/s3fs-fuse
+RUN ./autogen.sh && ./configure && make && make install
+
+## Set AWS Access credentials
+ENV AWS_ACCESS_KEY=<ACCESS KEY NAME>
+ENV AWS_SECRET_ACCESS_KEY=<ACCESS KEY SECRET>
+
+# S3fs-fuse credential config
+RUN echo $AWS_ACCESS_KEY:$AWS_SECRET_ACCESS_KEY > /root/.passwd-s3fs && \
+    chmod 600 /root/.passwd-s3fs

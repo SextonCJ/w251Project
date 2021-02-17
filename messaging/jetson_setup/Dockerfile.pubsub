@@ -1,0 +1,17 @@
+FROM python:3.7-alpine
+
+# Create working directory
+
+RUN mkdir -p /usr/src/app/engagement
+WORKDIR /usr/src/app/engagement
+
+# Copy contents
+COPY subpub.py /usr/src/app/engagement/
+
+# install OS packages
+RUN apk update
+RUN apk upgrade
+RUN apk add mosquitto-clients
+
+# Install python packages
+RUN pip install paho-mqtt
